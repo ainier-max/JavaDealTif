@@ -69,10 +69,10 @@ public class DealGeoTif {
         Raster raster=image.getData();
 
         DealGeoTif dealGeoTif=new DealGeoTif();
-        for (int i = 4000; i < 4100; i++) {
-            for (int j = 2000; j < 2100; j++) {
-//        for (int i = 0; i < width; i++) {
-//            for (int j = 0; j < height; j++) {
+//        for (int i = 4000; i < 4100; i++) {
+//            for (int j = 2000; j < 2100; j++) {
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
                 //System.out.println("i:"+i);
                 //System.out.println("i,j:"+i+","+j);
                 double pixelValue=0.0;
@@ -199,6 +199,22 @@ public class DealGeoTif {
             Map<String, Object> map=new HashMap<>();
             map.put("time",timeString);
             sqlSession.delete(sqlString, map);
+            sqlSession.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            sqlSession.close();
+        }
+    }
+
+    public void excuteInsertZzjgDroughtCount(String zzjg_time,String drought_time,String periods,String sqlString){
+        SqlSession sqlSession = MyBatisSqlSessionFactory.openSession();
+        try {
+            Map<String, Object> map=new HashMap<>();
+            map.put("zzjg_time",zzjg_time);
+            map.put("drought_time",drought_time);
+            map.put("periods",periods);
+            sqlSession.insert(sqlString, map);
             sqlSession.commit();
         } catch (Exception e) {
             e.printStackTrace();

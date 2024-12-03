@@ -45,6 +45,42 @@
         insert into geo_tif_count(pixel_sum,mu_sum,percentage,pixel_value,tif_type,periods,tif_file_name)
         select count(1) as pixel_sum,ROUND(count(1)*8.98315*8.98315*0.0015, 2) as mu_sum,ROUND(count(1)/${sum}*100,2) as percentage,pixel_value,#{tif_type} as tif_type,#{timeString} as periods,#{fileName} as tif_file_name from ${tableName} group by pixel_value
     </insert>
+
+
+    <insert id="insertZzjgDroughtCount" parameterType="java.util.HashMap" >
+        insert into geo_tif_zzjg_drought_result(sum,mu_value,zzjg_type,drought_type,zzjg_time,drought_time,periods)
+        SELECT
+            count(1) as sum,
+            ROUND(count(1)*8.98315*8.98315*0.0015, 2) as muValue,
+            zzjgType,
+            droughtType,
+            #{zzjg_time} as zzjg_time,
+            #{drought_time} as drought_time,
+            #{periods} as periods
+                from
+                    (
+                    select
+                    t.pixel_value as zzjgType,
+                    t1.pixel_value as droughtType,
+                    t.width,
+                    t.height
+                    from
+                    geo_tif_zzjg t
+                    inner join
+                    geo_tif_drought t1
+                    on
+                    t.width = t1.width
+                    and t.height = t1.height
+                    and t.time=#{zzjg_time}
+                    and t1.time=#{drought_time}
+                    ) as newTable
+                GROUP by
+                    zzjgType,
+                    droughtType
+    </insert>
+
+
+
 </mapper>
         <!--
             /*添加空间字段*/
