@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace='geo_tif'>
+    <insert id="zzjgInsertMany" parameterType="java.util.HashMap" >
+        <!--插入种植结构数据-->
+        INSERT INTO geo_tif_zzjg (id,pixel_value,time,x,y,width,height) VALUES
+        <foreach collection="objects" item="item" separator=",">
+            (#{item.id,jdbcType=VARCHAR},#{item.pixel_value,jdbcType=VARCHAR},#{item.time,jdbcType=VARCHAR},
+            #{item.x,jdbcType=DOUBLE},#{item.y,jdbcType=DOUBLE},#{item.width},#{item.height})
+        </foreach>
+    </insert>
+
+    <delete id="zzjgDeleteByTime" parameterType="java.util.HashMap" >
+        <!--删除种植结构数据，执行时间：约500S-->
+        delete from geo_tif_zzjg where time=#{time,jdbcType=VARCHAR}
+    </delete>
+
+    <insert id="droughtInsertMany" parameterType="java.util.HashMap" >
+        <!--插入干旱数据-->
+        INSERT INTO geo_tif_drought (id,pixel_value,time,x,y,width,height) VALUES
+        <foreach collection="objects" item="item" separator=",">
+            (#{item.id,jdbcType=VARCHAR},#{item.pixel_value,jdbcType=VARCHAR},#{item.time,jdbcType=VARCHAR},
+            #{item.x,jdbcType=DOUBLE},#{item.y,jdbcType=DOUBLE},#{item.width},#{item.height})
+        </foreach>
+    </insert>
+    <delete id="droughtDeleteByTime" parameterType="java.util.HashMap" >
+        <!--删除干旱数据-->
+        delete from geo_tif_drought where time=#{time,jdbcType=VARCHAR}
+    </delete>
+
+    <insert id="irrigationInsertMany" parameterType="java.util.HashMap" >
+        INSERT INTO geo_tif_irrigation (id,pixel_value,time,x,y,width,height) VALUES
+        <foreach collection="objects" item="item" separator=",">
+            (#{item.id,jdbcType=VARCHAR},#{item.pixel_value,jdbcType=VARCHAR},#{item.time,jdbcType=VARCHAR},
+            #{item.x,jdbcType=DOUBLE},#{item.y,jdbcType=DOUBLE},#{item.width},#{item.height})
+        </foreach>
+    </insert>
+    <delete id="irrigationDeleteByTime" parameterType="java.util.HashMap" >
+        delete from geo_tif_irrigation where time=#{time,jdbcType=VARCHAR}
+    </delete>
+
+    <insert id="insertCount" parameterType="java.util.HashMap" >
+        <!--统计种植结构,干旱,灌溉数据-->
+        insert into geo_tif_count(pixel_sum,mu_sum,percentage,pixel_value,tif_type,periods,tif_file_name)
+        select count(1) as pixel_sum,ROUND(count(1)*8.98315*8.98315*0.0015, 2) as mu_sum,ROUND(count(1)/${sum}*100,2) as percentage,pixel_value,#{tif_type} as tif_type,#{timeString} as periods,#{fileName} as tif_file_name from ${tableName} group by pixel_value
+    </insert>
+</mapper>
+        <!--
+            /*添加空间字段*/
+            ST_GeometryFromText(${item.point}),
+            /*表结构*/
+            CREATE TABLE `geo_tif_zzjg` (
+              `id` varchar(100) NOT NULL,
+              `pixel_value` varchar(100) DEFAULT NULL,
+              `time` varchar(100) DEFAULT NULL,
+              `x` double(30,20) DEFAULT NULL,
+              `y` double(30,20) DEFAULT NULL,
+              `width` int(11) DEFAULT NULL,
+              `height` int(11) DEFAULT NULL,
+              KEY `geo_tif_new_id_IDX` (`id`) USING BTREE,
+              KEY `geo_tif_new_x_IDX` (`x`,`y`) USING BTREE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+            /*查询某个地块有哪些植被-34S*/
+            SELECT t1.id,t1.pixel_value ,t1.point
+            FROM geo_massif_polygon_copy1 t ,geo_tif t1
+            WHERE t.id=993 and ST_Contains(t.geom, t1.point)
+            /*查询某地块有多少植被面积*/
+            select t.ssdkid,t.pixel_value,count(t.pixel_value) from geo_tif t where t.ssdkid ='993' GROUP  BY t.pixel_value
+            /*更新数据到geo_tif表中2500条地块,执行事件13小时*/
+            update geo_tif t1
+            set ssdkid =
+            (select t.id from geo_massif_polygon_copy1 t  where ST_Contains(t.geom, t1.point))
+            /*生成geo_tif结果表*/
+            create table geo_tif_zjjg_result as
+            select t1.name,t.ssdkid,t.pixel_value,ROUND(count(t.pixel_value)*8.98315*8.98315, 2) as areaValue,ROUND(count(t.pixel_value)*8.98315*8.98315*0.0015, 2) as muValue from geo_tif t,irrigation_water_price.geo_massif_polygon t1 where t.ssdkid =t1.id  and t.ssdkid is not null GROUP  BY t.ssdkid  ,t.pixel_value
+
+            /*查询某地块有哪些植被,坐标由前端传入-优化查询（3MS）*/
+            SELECT t1.id,t1.pixel_value ,t1.point
+            FROM  geo_massif_polygon_copy1 t ,(select * from geo_tif_new  where x>130.1840 and x<130.1855 and y>46.9425 and y<46.9438) t1
+            WHERE t.id=993 and ST_Contains(t.geom, t1.point)
+
+            /*查询某地块有哪些植被,地块边界坐标由前端传入-优化查询（34S->6MS）优点：（1）处理花费时间16分钟，（2）支持地块变化，数据无需再处理（3）插入表数据是原始数据，方便验证查询*/
+            SELECT t.name,t.id,t1.time,t1.pixel_value,count(t1.pixel_value) as sum,ROUND(count(t1.pixel_value)*8.98315*8.98315, 2) as areaValue,ROUND(count(t1.pixel_value)*8.98315*8.98315*0.0015, 2) as muValue
+            FROM  geo_massif_polygon_copy1 t ,(select * from geo_tif_new  where x>130.1840 and x<130.1855 and y>46.9425 and y<46.9438) t1
+            WHERE t.id=993  and ST_Contains(t.geom, t1.point) group by t.id,t1.pixel_value,t1.time order by t1.time
+            /*查询某地块有哪些植被,地块边界坐标由前端传入-优化查询（34S->6MS）优点：（1）处理花费时间16分钟，（2）支持地块变化，数据无需再处理（3）插入表数据是原始数据，方便验证查询*/
+            SELECT t.name,t.id,t1.time,t1.pixel_value,count(t1.pixel_value) as sum,ROUND(count(t1.pixel_value)*8.98315*8.98315, 2) as areaValue,ROUND(count(t1.pixel_value)*8.98315*8.98315*0.0015, 2) as muValue
+            FROM  irrigation_water_price.geo_massif_polygon t ,(select * from geo_tif_zzjg  where x>130.1840 and x<130.1855 and y>46.9425 and y<46.9438) t1
+            WHERE t.id=993  and ST_Contains(t.geom, ST_GeomFromText(ST_AsText(POINT( t1.x , t1.y)), 4326)) group by t.id,t1.pixel_value,t1.time order by t1.time
+
+            /*植被干旱结果表创建*/
+            CREATE TABLE geo_tif_zzjg_drought_result as
+            SELECT
+                count(1) as sum,
+                ROUND(count(1)*8.98315*8.98315*0.0015, 2) as muValue,
+                zzjgType,
+                droughtType
+            from
+                (
+                select
+                    t.pixel_value as zzjgType,
+                    t1.pixel_value as droughtType,
+                    t.width,
+                    t.height
+                from
+                    geo_tif_zzjg t
+                left join
+                geo_tif_drought t1
+                on
+                    t.width = t1.width
+                    and t.height = t1.height
+                ) as newTable
+            GROUP by
+                zzjgType,
+                droughtType
+
+
+
+            /*创建各个类型统计占比结果表（种植结构）*/
+            create table geo_tif_count as
+            select count(1) as pixelSum,ROUND(count(1)/6552236*100,2) as percentage,pixel_value,'zzjg' as countType,'种植结构' as countTypeName,'2024' as countTime from geo_tif_zzjg group by pixel_value
+            /*插入干旱监测统计占比结果*/
+            insert into geo_tif_count
+            select count(1) as pixelSum,ROUND(count(1)/5056482*100,2) as percentage,pixel_value,'drought' as countType,'干旱监测' as countTypeName,'20240610' as countTime from geo_tif_drought group by pixel_value
+
+           -->
+
