@@ -1,0 +1,21 @@
+/*测试语句：地块ID种植哪些植被*/
+SELECT t.id,t1.pixel_value,count(t1.pixel_value) as sum
+FROM geo_massif_polygon t ,geo_tif_zzjg t1
+WHERE t.id in(33237,33241,33481,33484,33723,33725,33758,33750,33789,33806) and ST_Contains(t.geom, t1.geom) GROUP by t.id,pixel_value
+
+/*每个地块ID,都有哪些种植物,生成结果表,注：geo_massif_polygon 需要创建ID索引(运行10个小时)*/
+create table geo_count_zzjg_massif as
+SELECT t.id,t1.pixel_value,count(t1.pixel_value) as sum
+FROM geo_massif_polygon t ,geo_tif_zzjg t1
+WHERE ST_Contains(t.geom, t1.geom) GROUP by t.id,pixel_value
+
+/*每个地块ID,每组取最大值,生成结果表*/
+create table geo_count_zzjg_massif_max as
+select s1.id,s1.pixel_value,MAX(sum) as max_amount
+from geo_count_zzjg_massif s1
+join(
+SELECT id,MAX(sum) AS amount
+FROM geo_count_zzjg_massif
+GROUP BY id
+) s2 on s1.id = s2.id and s1.sum =s2.amount
+group by s1.id,s1.pixel_value

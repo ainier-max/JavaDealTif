@@ -14,7 +14,8 @@ public class MyBatisSqlSessionFactory {
         if (sqlSessionFactory == null) {
             InputStream inputStream;
             try {
-                inputStream = Resources.getResourceAsStream("mybatis-config-dealtif.xml");
+                //inputStream = Resources.getResourceAsStream("mybatis-config-dealtif.xml");
+                inputStream = Resources.getResourceAsStream("mybatis-config-dealtif-pg.xml");
                 sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
             } catch (IOException e) {
                 throw new RuntimeException(e.getCause());

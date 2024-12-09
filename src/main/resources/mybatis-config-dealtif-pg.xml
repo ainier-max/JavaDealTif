@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <!--打印执行sql语句-->
+    <settings>
+        <setting name="logImpl" value="NO_LOGGING"/>
+    </settings>
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC" />
+            <dataSource type="cbc.boot.myboot.dealtif.DruidDataSourceFactory">
+                <property name="driverClassName" value="org.postgresql.Driver" />
+                <property name="url" value="jdbc:postgresql://192.168.9.145:5432/postgres" />
+                <property name="username" value="postgres" />
+                <property name="password" value="1a!23456" />
+                <property name="initialSize" value="10"/>
+                <property name="maxActive" value="2000"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <mappers>
+        <mapper resource="mapper/tif/geo_tif.xml"/>
+    </mappers>
+</configuration>
+
+<!--
+CREATE TABLE geo_tif_zzjg (
+	id varchar(100) NULL,
+	pixel_value varchar(100) NULL,
+	"time" varchar NULL,
+	x float8 NULL,
+	y float8 NULL,
+	width int4 NULL,
+	height int4 NULL,
+	geom geometry NULL
+);
+select UpdateGeometrySRID('geo_tif_zzjg', 'geom', 4326); //设置字段为4626坐标系必须执行
+
+
+-->

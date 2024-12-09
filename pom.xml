@@ -181,6 +181,13 @@
 			<artifactId>crypto</artifactId>
 			<version>0.1.1</version>
 		</dependency>
+		<!--pg库依赖-->
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.7.4</version>
+		</dependency>
+
 
 
 		<!-- 添加GeoTools库的依赖 -->

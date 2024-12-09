@@ -20,11 +20,32 @@ import java.util.*;
 public class DealGeoTif {
     /**
      * 种植结构遥感数据插入
-     * 注：一次插入10000条数据
+     * 注：一次插入batchValue条数据
      * @param FilePath 文件路径
      * @param TimeString 期数
      */
-    public void tifInsertMany(String tif_type,String FilePath,String TimeString,String sqlString,int minPixelValue,int maxPixelValue) throws Exception{
+    public void tifInsertMany(String tif_type,String FilePath,String TimeString) throws Exception{
+        int batchValue=8000;
+        String sqlString="";
+        int minPixelValue=0;
+        int maxPixelValue=0;
+        if(tif_type=="zzjg"){
+            sqlString="geo_tif.zzjgInsertMany";
+            minPixelValue=1;
+            maxPixelValue=7;
+        }else if(tif_type=="drought"){
+            sqlString="geo_tif.droughtInsertMany";
+            minPixelValue=1;
+            maxPixelValue=5;
+        }else if(tif_type=="irrigation"){
+            sqlString="geo_tif.irrigationInsertMany";
+            minPixelValue=1;
+            maxPixelValue=2;
+        }
+        System.out.println("tif类别:"+tif_type);
+        System.out.println("像素值范围:"+minPixelValue+"-"+maxPixelValue);
+        System.out.println("执行语句:"+sqlString);
+
         Date date1=new Date();
         File file = new File(FilePath);
 
@@ -91,7 +112,7 @@ public class DealGeoTif {
                     Map<String, Object> objectMap=new HashMap<>();
                     objectMap.put("id", UUID.randomUUID().toString().replace("-",""));
                     objectMap.put("pixel_value",(int)pixelValue);
-                    //objectMap.put("point","'POINT(" + longitude +" "+ latitude + ")'");
+                    objectMap.put("geom","'POINT(" + longitude +" "+ latitude + ")'");
                     objectMap.put("time",TimeString);
                     objectMap.put("x",longitude);
                     objectMap.put("y",latitude);
@@ -100,8 +121,8 @@ public class DealGeoTif {
                     list.add(objectMap);
                     //System.out.println(coordinate);
                     //System.out.println("像素点 (" + i + ", " + j + ") 的值： " + pixelValue + "    坐标为:" + worldPos.getCoordinate()[0] + "，" + worldPos.getCoordinate()[1]);
-                    if(list.size()!=0 && list.size()%10000==0){
-                        sum=sum+10000;
+                    if(list.size()!=0 && list.size()%batchValue==0){
+                        sum=sum+batchValue;
                         System.out.println("插入数据量:"+sum);
                         dealGeoTif.excuteInsertSql(list,sqlString);
                         try {

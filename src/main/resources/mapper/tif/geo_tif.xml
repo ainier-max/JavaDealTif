@@ -4,10 +4,10 @@
 <mapper namespace='geo_tif'>
     <insert id="zzjgInsertMany" parameterType="java.util.HashMap" >
         <!--插入种植结构数据-->
-        INSERT INTO geo_tif_zzjg (id,pixel_value,time,x,y,width,height) VALUES
+        INSERT INTO geo_tif_zzjg (id,pixel_value,time,x,y,width,height,geom) VALUES
         <foreach collection="objects" item="item" separator=",">
             (#{item.id,jdbcType=VARCHAR},#{item.pixel_value,jdbcType=VARCHAR},#{item.time,jdbcType=VARCHAR},
-            #{item.x,jdbcType=DOUBLE},#{item.y,jdbcType=DOUBLE},#{item.width},#{item.height})
+            #{item.x,jdbcType=DOUBLE},#{item.y,jdbcType=DOUBLE},#{item.width},#{item.height},ST_GeometryFromText(${item.geom}))
         </foreach>
     </insert>
 
@@ -18,10 +18,10 @@
 
     <insert id="droughtInsertMany" parameterType="java.util.HashMap" >
         <!--插入干旱数据-->
-        INSERT INTO geo_tif_drought (id,pixel_value,time,x,y,width,height) VALUES
+        INSERT INTO geo_tif_drought (id,pixel_value,time,x,y,width,height,geom) VALUES
         <foreach collection="objects" item="item" separator=",">
             (#{item.id,jdbcType=VARCHAR},#{item.pixel_value,jdbcType=VARCHAR},#{item.time,jdbcType=VARCHAR},
-            #{item.x,jdbcType=DOUBLE},#{item.y,jdbcType=DOUBLE},#{item.width},#{item.height})
+            #{item.x,jdbcType=DOUBLE},#{item.y,jdbcType=DOUBLE},#{item.width},#{item.height},ST_GeometryFromText(${item.geom}))
         </foreach>
     </insert>
     <delete id="droughtDeleteByTime" parameterType="java.util.HashMap" >
@@ -30,10 +30,10 @@
     </delete>
 
     <insert id="irrigationInsertMany" parameterType="java.util.HashMap" >
-        INSERT INTO geo_tif_irrigation (id,pixel_value,time,x,y,width,height) VALUES
+        INSERT INTO geo_tif_irrigation (id,pixel_value,time,x,y,width,height,geom) VALUES
         <foreach collection="objects" item="item" separator=",">
             (#{item.id,jdbcType=VARCHAR},#{item.pixel_value,jdbcType=VARCHAR},#{item.time,jdbcType=VARCHAR},
-            #{item.x,jdbcType=DOUBLE},#{item.y,jdbcType=DOUBLE},#{item.width},#{item.height})
+            #{item.x,jdbcType=DOUBLE},#{item.y,jdbcType=DOUBLE},#{item.width},#{item.height},ST_GeometryFromText(${item.geom}))
         </foreach>
     </insert>
     <delete id="irrigationDeleteByTime" parameterType="java.util.HashMap" >

@@ -12,15 +12,12 @@ public class IrrigationCalculatorTest {
     public void testIrrigationInsertMany() throws Exception{
         //植被结构遥感影像插入，自动统计该表占比统计
         String FilePath="E:\\workspaceForMe\\dealTif\\data\\geo_tif_irrigation\\20240516_灌溉范围数据.tif";
-        String sqlString="geo_tif.irrigationInsertMany";
         String tif_type="irrigation";
-        int minPixelValue=1;
-        int maxPixelValue=2;
         Date date=new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
         String TimeString = dateFormat.format(date);//期数为数据插入时间，格式为：20241127
         DealGeoTif dealGeoTif=new DealGeoTif();
-        dealGeoTif.tifInsertMany(tif_type,FilePath,TimeString,sqlString,minPixelValue,maxPixelValue);
+        dealGeoTif.tifInsertMany(tif_type,FilePath,TimeString);
     }
 
     @Test
@@ -55,7 +52,7 @@ public class IrrigationCalculatorTest {
      `height` int(11) DEFAULT NULL,
      KEY `geo_tif_drought_x_IDX` (`x`,`y`) USING BTREE,
      KEY `geo_tif_drought_width_IDX` (`width`,`height`) USING BTREE,
-     KEY `geo_tif_drought_pixelValue_IDX` (`pixelValue`) USING BTREE
+     KEY `geo_tif_drought_pixelValue_IDX` (`pixel_value`) USING BTREE
      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
      *

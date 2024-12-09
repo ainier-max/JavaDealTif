@@ -1,0 +1,21 @@
+/*测试语句：网格的干旱情况*/
+SELECT t.id,t1.pixel_value,count(t1.pixel_value) as sum
+FROM hq_generate_grid t ,geo_tif_drought t1
+WHERE t.id in(48,120,1,2,3) and ST_Contains(t.geom, t1.geom) GROUP by t.id,pixel_value
+
+/*每个网格的干旱情况结果表注：hq_generate_grid 需要创建ID索引(运行8分钟)*/
+create table geo_count_drought_grid as
+SELECT t.id,t1.pixel_value,count(t1.pixel_value) as sum
+FROM hq_generate_grid t ,geo_tif_drought t1
+WHERE ST_Contains(t.geom, t1.geom) GROUP by t.id,pixel_value
+
+/*每个网格ID,每组取最大值,生成结果表*/
+create table geo_count_drought_grid_max as
+select s1.id,s1.pixel_value,MAX(sum) as max_amount
+from geo_count_drought_grid s1
+join(
+SELECT id,MAX(sum) AS amount
+FROM geo_count_drought_grid
+GROUP BY id
+) s2 on s1.id = s2.id and s1.sum =s2.amount
+group by s1.id,s1.pixel_value

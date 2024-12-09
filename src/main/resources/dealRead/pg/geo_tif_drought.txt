@@ -1,0 +1,18 @@
+/*表结构*/
+CREATE TABLE geo_tif_drought (
+	id varchar(100) NULL,
+	pixel_value varchar(100) NULL,
+	"time" varchar NULL,
+	x float8 NULL,
+	y float8 NULL,
+	width int4 NULL,
+	height int4 NULL,
+	geom geometry(geometry, 4326) NULL
+);
+CREATE INDEX geo_tif_zzjg_geom_idx ON public.geo_tif_zzjg USING btree (geom);
+CREATE INDEX geo_tif_zzjg_id_idx ON public.geo_tif_zzjg USING btree (id);
+CREATE INDEX geo_tif_zzjg_width_idx ON public.geo_tif_zzjg USING btree (width, height);
+CREATE INDEX geo_tif_zzjg_x_idx ON public.geo_tif_zzjg USING btree (x, y);
+
+/*设置字段为4626坐标系必须执行*/
+select UpdateGeometrySRID('geo_tif_drought', 'geom', 4326);

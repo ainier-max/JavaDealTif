@@ -12,15 +12,12 @@ public class ZzjgCalculatorTest {
     public void testZzjgInsertMany() throws Exception{
         //植被结构遥感影像插入,自动统计该表占比统计
         String FilePath="E:\\workspaceForMe\\dealTif\\data\\geo_tif_zzjg\\2024年_种植结构影像.tif";
-        String sqlString="geo_tif.zzjgInsertMany";
         String tif_type="zzjg";
-        int minPixelValue=1;
-        int maxPixelValue=7;
         Date date=new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
         String TimeString = dateFormat.format(date);//期数为数据插入时间，格式为：20241127
         DealGeoTif dealGeoTif=new DealGeoTif();
-        dealGeoTif.tifInsertMany(tif_type,FilePath,TimeString,sqlString,minPixelValue,maxPixelValue);
+        dealGeoTif.tifInsertMany(tif_type,FilePath,TimeString);
     }
 
     @Test
